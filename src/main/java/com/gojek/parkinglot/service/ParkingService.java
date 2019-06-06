@@ -1,5 +1,7 @@
 package com.gojek.parkinglot.service;
 
+import com.gojek.parkinglot.exception.ParkingLotException;
+import com.gojek.parkinglot.model.ParkingLot;
 import com.gojek.parkinglot.model.ParkingTicket;
 import com.gojek.parkinglot.model.Vehicle;
 
@@ -13,12 +15,13 @@ import java.util.List;
  */
 public interface ParkingService {
 
-  void createParkingLot(int capacity);
-  ParkingTicket park(Vehicle vehicle);
+  ParkingLot createParkingLot(int capacity);
+  ParkingTicket park(Vehicle vehicle) throws ParkingLotException;
   void leave(int slot);
   void getStatus();
-  void fetchRegistrationNoForColor(String color);
-  void fetchSlotNoForColor(String color);
+  List<String> fetchRegistrationNoForColor(String color);
+  List<Integer> fetchSlotNoForColor(String color);
   int getSlotNoForRegistrationNo(String regNo);
+  void cleanUp();
 
 }

@@ -21,21 +21,21 @@ import java.util.Map;
  */
 public class ParkingServiceImpl implements ParkingService {
 
-  ParkingLot parkingLot;
-  ParkingLotRepository repository = new ParkingLotRepository();
+  private ParkingLot parkingLot;
+  private ParkingLotRepository repository = new ParkingLotRepository();
 
   @Override
-  public void createParkingLot(int capacity) {
+  public ParkingLot createParkingLot(int capacity) {
     if (parkingLot != null) {
       throw new ParkingLotException(ErrorCode.PARKING_LOT_EXISTS);
     }
     parkingLot = ParkingLot.getInstance(capacity);
     System.out.println("Created parking lot with " + capacity + " slots");
-
+    return parkingLot;
   }
 
   @Override
-  public ParkingTicket park(Vehicle vehicle) {
+  public ParkingTicket park(Vehicle vehicle) throws ParkingLotException {
     validate();
     ParkingTicket ticket = null;
     if (parkingLot.isFull()) {
@@ -60,6 +60,8 @@ public class ParkingServiceImpl implements ParkingService {
       parkingLot.getStrategy().add(parkingTicket.getSlot());
       parkingLot.increment();
       System.out.println("Slot number " + parkingTicket.getSlot() + " is free");
+    } else {
+      throw new ParkingLotException(ErrorCode.SLOT_IS_EMPTY);
     }
   }
 
@@ -76,7 +78,7 @@ public class ParkingServiceImpl implements ParkingService {
   }
 
   @Override
-  public void fetchRegistrationNoForColor(String color) {
+  public List<String> fetchRegistrationNoForColor(String color) {
     validate();
     List<String> result = new ArrayList<>();
     Map<Integer, Vehicle> vehiclesWithSameColor = fetchVehiclesWithSameColor(color);
@@ -85,11 +87,12 @@ public class ParkingServiceImpl implements ParkingService {
       String output = result.toString();
       System.out.println(output.substring(1,output.length()-1));
     }
+    return result;
   }
 
 
   @Override
-  public void fetchSlotNoForColor(String color) {
+  public List<Integer> fetchSlotNoForColor(String color) {
     validate();
     Map<Integer, Vehicle> vehiclesWithSameColor = fetchVehiclesWithSameColor(color);
     List<Integer> result = new ArrayList<>();
@@ -98,6 +101,7 @@ public class ParkingServiceImpl implements ParkingService {
       String output = result.toString();
       System.out.println(output.substring(1,output.length()-1));
     }
+    return result;
   }
 
   @Override
@@ -141,9 +145,9 @@ public class ParkingServiceImpl implements ParkingService {
     return vehiclesWithSameColor;
   }
 
-  private void validate() {
+  private void validate()  throws ParkingLotException {
     if (parkingLot == null) {
-      throw  new ParkingLotException(ErrorCode.PARKING_LOT_NOT_EXISTS);
+      throw new ParkingLotException(ErrorCode.PARKING_LOT_NOT_EXISTS);
     }
   }
 
@@ -155,6 +159,15 @@ public class ParkingServiceImpl implements ParkingService {
     repository.addTicket(ticket);
     parkingLot.decrement();
     return ticket;
+  }
+
+  @Override
+  public void cleanUp() {
+    if (parkingLot != null) {
+      repository.setSlotVehicleMap(new HashMap<>());
+      repository.setActiveTickets(new HashMap<>());
+      parkingLot.doCleanUp();
+    }
   }
 
 }

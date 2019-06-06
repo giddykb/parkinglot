@@ -64,6 +64,14 @@ public class ParkingLot implements Serializable {
     availableSlots++;
   }
 
+  public void doCleanUp() {
+    this.capacity = 0;
+    this.availableSlots = 0;
+    this.floor  = 1;
+    strategy = new NearestStrategy();
+    INSTANCE = null;
+  }
+
   public void decrement() {
     availableSlots--;
   }
