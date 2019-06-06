@@ -9,4 +9,6 @@ Run the following command in project folder
 From the project directory, run this command
 
 ```java -jar target/parkinglot-0.0.1-SNAPSHOT.jar (shell)```
+
+
 ```java -jar target/parkinglot-0.0.1-SNAPSHOT.jar <input file path> (read from file)```
